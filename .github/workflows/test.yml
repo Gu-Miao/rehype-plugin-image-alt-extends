@@ -5,9 +5,9 @@ name: Node.js CI
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   pull_request:
-    branches: [master]
+    branches: [main]
 
 jobs:
   test:
@@ -20,7 +20,7 @@ jobs:
       - run: corepack enable
       - run: pnpm install
       - run: pnpm test
-      - uses: codecov/codecov-action@v2.1.0
+      - uses: codecov/codecov-action@v3.1.0
         with:
           # Directory to search for coverage reports.
           directory: coverage
