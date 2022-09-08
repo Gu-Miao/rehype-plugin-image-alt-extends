@@ -4,39 +4,70 @@ import hast from 'hast'
 import { Processor, Transformer } from 'unified'
 import { Node } from 'unist'
 
-export const regexp = /(.*)\|\|(#\S+\s)?((\.\S+\s)*)((\S+=\S+\s)*)(\d+(\.\d+)?)x(\d+(\.\d+)?)$/
-type Matched = [string, string, string, string, string, string, string, string, string, string]
+const idRegExp = /^#\S+$/
+const classNameRegExp = /^\.\S+$/
+const propertyRegExp = /^(\S+)=(\S+)$/
+const sizeRegExp = /^(\d+(?:\.\d+)?)x(\d+(?:\.\d+)?)/
 
 function imageAltExtendsPlugin(this: Processor): Transformer {
   function visitor(el: hast.Element) {
     if (el.tagName !== 'img' || !el.properties) return
 
-    const altStr = el.properties.alt as string
-    if (!altStr || !regexp.test(altStr)) return
+    const alt = el.properties.alt as string | undefined
+    if (!alt) return
 
-    const [, alt, idStr, classStr, , propsStr, , width, , height] = altStr.match(regexp) as Matched
+    const altSlice = alt.split('||')
+    if (altSlice.length === 1) return
+
+    const [lastSlice] = altSlice.splice(altSlice.length - 1, 1)
+
+    let isValid = true
+    let id: string | undefined
+    const classNames: string[] = []
     const props: Record<string, any> = {}
+    let width: string | undefined
+    let height: string | undefined
 
-    if (propsStr) {
-      const propsArr = propsStr.split(' ')
-      propsArr.forEach(str => {
-        const [key, val] = str.split('=')
-        props[key] = val
-      })
-    }
-    if (idStr) {
-      props.id = idStr.replace(/#/, '').trim()
-    }
-    if (classStr) {
-      props.class = classStr.replace(/\./g, '').trim()
-    }
+    const syntaxSlices = lastSlice.trim().split(/\s+/)
+    if (syntaxSlices.length === 1 && syntaxSlices[0] === '') return
+    syntaxSlices.every(syntax => {
+      if (idRegExp.test(syntax)) {
+        if (id) {
+          isValid = false
+          return
+        }
+        id = syntax.replace('#', '')
+      } else if (classNameRegExp.test(syntax)) {
+        classNames.push(syntax.replace('.', ''))
+      } else if (propertyRegExp.test(syntax)) {
+        const [, key, value] = syntax.match(propertyRegExp) as [string, string, string]
+        props[key] = value
+      } else if (sizeRegExp.test(syntax)) {
+        if (width || height) {
+          isValid = false
+          return
+        }
+        const [, w, h] = syntax.match(sizeRegExp) as [string, string, string]
+        width = w
+        height = h
+      } else {
+        isValid = false
+      }
+
+      return true
+    })
+
+    if (!isValid) return
+
     el.properties = {
       ...el.properties,
       ...props,
-      alt,
       width,
-      height
+      height,
+      alt: altSlice.join('||')
     }
+    if (id) el.properties.id = id
+    if (classNames.length) el.properties.class = classNames.join(' ')
   }
 
   function transformer(htmlAST: Node): Node {

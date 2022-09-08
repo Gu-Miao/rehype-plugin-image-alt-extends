@@ -22,7 +22,7 @@ async function process(rawMarkdown: string): Promise<string> {
 
 test('alt+id+class+props+size', async () => {
   const content =
-    '![logo||#img .banner .logo loading=lazy 400.5x300.5](http://example.com/logo.png)'
+    '![logo||   #img .banner .logo loading=lazy 400.5x300.5](http://example.com/logo.png)'
   const html = await process(content)
   document.body.innerHTML = html
   console.log(html)
@@ -36,6 +36,17 @@ test('alt+id+class+props+size', async () => {
   expect(img.getAttribute('height')).toBe('300.5')
 })
 
+test('alt+size', async () => {
+  const content = '![logo|| 500x300  ](http://example.com/logo.png)'
+  const html = await process(content)
+  document.body.innerHTML = html
+  const img = document.querySelector('img') as HTMLImageElement
+  expect(img.src).toBe('http://example.com/logo.png')
+  expect(img.alt).toBe('logo')
+  expect(img.width).toBe(500)
+  expect(img.height).toBe(300)
+})
+
 test('alt only', async () => {
   const content = '![logo](http://example.com/logo.png)'
   const html = await process(content)
@@ -47,13 +58,47 @@ test('alt only', async () => {
   expect(img.height).toBe(0)
 })
 
-test('alt+size', async () => {
-  const content = '![logo||500x300](http://example.com/logo.png)'
+test('empty rule', async () => {
+  const content = '![logo||](http://example.com/logo.png)'
   const html = await process(content)
   document.body.innerHTML = html
   const img = document.querySelector('img') as HTMLImageElement
   expect(img.src).toBe('http://example.com/logo.png')
-  expect(img.alt).toBe('logo')
-  expect(img.width).toBe(500)
-  expect(img.height).toBe(300)
+  expect(img.alt).toBe('logo||')
+})
+
+test('duplicate id', async () => {
+  const content = '![logo||#e33  500x600  #55   ](http://example.com/logo.png)'
+  const html = await process(content)
+  document.body.innerHTML = html
+  const img = document.querySelector('img') as HTMLImageElement
+  expect(img.src).toBe('http://example.com/logo.png')
+  expect(img.alt).toBe('logo||#e33  500x600  #55   ')
+})
+
+test('duplicate size', async () => {
+  const content = '![logo||#e33 500x600 .logo loading=lazy   777x333](http://example.com/logo.png)'
+  const html = await process(content)
+  document.body.innerHTML = html
+  const img = document.querySelector('img') as HTMLImageElement
+  expect(img.src).toBe('http://example.com/logo.png')
+  expect(img.alt).toBe('logo||#e33 500x600 .logo loading=lazy   777x333')
+})
+
+test('invalid syntax', async () => {
+  const content = '![logo||#logo   .bg-white loadinglazy 500x300](http://example.com/logo.png)'
+  const html = await process(content)
+  document.body.innerHTML = html
+  const img = document.querySelector('img') as HTMLImageElement
+  expect(img.src).toBe('http://example.com/logo.png')
+  expect(img.alt).toBe('logo||#logo   .bg-white loadinglazy 500x300')
+})
+
+test('empty alt', async () => {
+  const content = '![](http://example.com/logo.png)'
+  const html = await process(content)
+  document.body.innerHTML = html
+  const img = document.querySelector('img') as HTMLImageElement
+  expect(img.src).toBe('http://example.com/logo.png')
+  expect(img.alt).toBe('')
 })

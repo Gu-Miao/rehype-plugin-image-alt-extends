@@ -49,13 +49,80 @@ async function run() {
 }
 ```
 
-## Match
+## Extended rules
 
-```js
-const regexp = /(.*)\|\|(#\S+\s)?((\.\S+\s)*)((\S+=\S+\s)*)(\d+(\.\d+)?)x(\d+(\.\d+)?)$/
+There are four extended rules:
+
+- **id rule**: `#id`
+- **classname rule**: `.classname`
+- **property rule**: `key=val`
+- **size rule**: `500.5x300`
+
+---
+
+- All rules must be separated by spaces.
+
+```md
+![logo||#img 400x400](http://example.com/logo.png) <!-- Good -->
+[logo||#img400x400](http://example.com/logo.png) <!-- Bad, 400x400 will be a part of id -->
 ```
 
-`alt`, `id`, `class`, and other properties are optional. `width` and `height` are required.
+- We use `trim()` and `split(/\s+/)` to split syntax slices. So you could have spaces in the beginning or ending and the count of spaces is not important:
+
+```md
+![logo||    #img   400x400   .bg-white ](http://example.com/logo.png)
+```
+
+- No fixed order, below two have same output.
+
+```md
+![logo||.bg-red #img 400x400](http://example.com/logo.png)
+![logo||400x400 #img .bg-red](http://example.com/logo.png)
+```
+
+- Size rule support decimal:
+
+```md
+![logo||500.5x300.33](http://example.com/logo.png)
+```
+
+- If there is no content after the `||`, it will not be parsed as extended grammar.
+
+```md
+![logo||](http://example.com/logo.png)
+
+<!-- output -->
+
+<img src="http://example.com/logo.png" alt="logo||" />
+```
+
+- If there is an error in the extended syntax, then instead of continuing parsing, it returns original alt.
+
+```md
+![logo||#logo lazy_loading](http://example.com/logo.png)
+
+<!-- output, lazy_loading is invalid syntax -->
+
+<img src="http://example.com/logo.png" alt="logo||#logo lazy_loading" />
+```
+
+- id rule and size rule can only appear once, otherwise it won't parse:
+
+```md
+![logo||#logo #logo1](http://example.com/logo.png)
+
+<!-- output, duplicate id rule -->
+
+<img src="http://example.com/logo.png" alt="logo||#logo #logo1" />
+```
+
+```md
+![logo||500x300 500x300](http://example.com/logo.png)
+
+<!-- output, duplicate size rule -->
+
+<img src="http://example.com/logo.png" alt="logo||500x300 500x300" />
+```
 
 ## LICENCE
 
