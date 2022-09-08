@@ -43,16 +43,16 @@ async function process(markdown: string) {
 }
 
 async function run() {
-  const input = '![logo||#img .banner .logo loading=lazy 400x300](http://example.com/logo.png)'
+  const input = '![logo||#img .banner .logo loading=lazy 400.5x300.5](http://example.com/logo.png)'
   const output = await process(input)
-  console.log(output) // <p><img src="http://example.com/logo.png" alt="logo" loading="lazy" id="img" class="banner logo" width="400" height="300"></p>
+  console.log(output) // <p><img src="http://example.com/logo.png" alt="logo" loading="lazy" id="img" class="banner logo" width="400.5" height="300.5"></p>
 }
 ```
 
 ## Match
 
 ```js
-const regexp = /(.*)\|\|(#\S+\s)?((\.\S+\s)*)((\S+=\S+\s)*)(\d+)x(\d+)?$/
+const regexp = /(.*)\|\|(#\S+\s)?((\.\S+\s)*)((\S+=\S+\s)*)(\d+(\.\d+)?)x(\d+(\.\d+)?)$/
 ```
 
 `alt`, `id`, `class`, and other properties are optional. `width` and `height` are required.
