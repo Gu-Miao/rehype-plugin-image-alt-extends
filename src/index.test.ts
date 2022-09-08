@@ -21,7 +21,8 @@ async function process(rawMarkdown: string): Promise<string> {
 }
 
 test('alt+id+class+props+size', async () => {
-  const content = '![logo||#img .banner .logo loading=lazy 400x300](http://example.com/logo.png)'
+  const content =
+    '![logo||#img .banner .logo loading=lazy 400.5x300.5](http://example.com/logo.png)'
   const html = await process(content)
   document.body.innerHTML = html
   console.log(html)
@@ -31,8 +32,8 @@ test('alt+id+class+props+size', async () => {
   expect(img.classList.contains('banner')).toBe(true)
   expect(img.classList.contains('logo')).toBe(true)
   expect(img.getAttribute('loading')).toBe('lazy')
-  expect(img.width).toBe(400)
-  expect(img.height).toBe(300)
+  expect(img.getAttribute('width')).toBe('400.5')
+  expect(img.getAttribute('height')).toBe('300.5')
 })
 
 test('alt only', async () => {

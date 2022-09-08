@@ -4,8 +4,8 @@ import hast from 'hast'
 import { Processor, Transformer } from 'unified'
 import { Node } from 'unist'
 
-export const regexp = /(.*)\|\|(#\S+\s)?((\.\S+\s)*)((\S+=\S+\s)*)(\d+)x(\d+)?$/
-type Matched = [string, string, string, string, string, string, string, string, string]
+export const regexp = /(.*)\|\|(#\S+\s)?((\.\S+\s)*)((\S+=\S+\s)*)(\d+(\.\d+)?)x(\d+(\.\d+)?)$/
+type Matched = [string, string, string, string, string, string, string, string, string, string]
 
 function imageAltExtendsPlugin(this: Processor): Transformer {
   function visitor(el: hast.Element) {
@@ -14,7 +14,7 @@ function imageAltExtendsPlugin(this: Processor): Transformer {
     const altStr = el.properties.alt as string
     if (!altStr || !regexp.test(altStr)) return
 
-    const [, alt, idStr, classStr, , propsStr, , width, height] = altStr.match(regexp) as Matched
+    const [, alt, idStr, classStr, , propsStr, , width, , height] = altStr.match(regexp) as Matched
     const props: Record<string, any> = {}
 
     if (propsStr) {
