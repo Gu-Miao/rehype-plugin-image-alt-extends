@@ -47,6 +47,18 @@ test('alt+size', async () => {
   expect(img.height).toBe(300)
 })
 
+test('alt+props+id', async () => {
+  const content = '![logo||   #img width=auto loading=lazy](http://example.com/logo.png)'
+  const html = await process(content)
+  document.body.innerHTML = html
+  console.log(html)
+  const img = document.querySelector('#img') as HTMLImageElement
+  expect(img.src).toBe('http://example.com/logo.png')
+  expect(img.alt).toBe('logo')
+  expect(img.getAttribute('loading')).toBe('lazy')
+  expect(img.getAttribute('width')).toBe('auto')
+})
+
 test('alt only', async () => {
   const content = '![logo](http://example.com/logo.png)'
   const html = await process(content)

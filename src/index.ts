@@ -62,12 +62,14 @@ function imageAltExtendsPlugin(this: Processor): Transformer {
     el.properties = {
       ...el.properties,
       ...props,
-      width,
-      height,
       alt: altSlice.join('||')
     }
     if (id) el.properties.id = id
     if (classNames.length) el.properties.class = classNames.join(' ')
+    if (width && height) {
+      el.properties.width = width
+      el.properties.height = height
+    }
   }
 
   function transformer(htmlAST: Node): Node {
