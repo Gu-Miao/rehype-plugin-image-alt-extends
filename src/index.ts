@@ -81,4 +81,3 @@ function imageAltExtendsPlugin(this: Processor): Transformer {
 }
 
 export default imageAltExtendsPlugin
-module.exports = imageAltExtendsPlugin
