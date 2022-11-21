@@ -21,6 +21,7 @@
     "url": "https://github.com/Gu-Miao/rehype-plugin-image-alt-extends/issues"
   },
   "homepage": "https://github.com/Gu-Miao/rehype-plugin-image-alt-extends#readme",
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
