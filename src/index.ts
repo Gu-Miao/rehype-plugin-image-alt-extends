@@ -1,5 +1,5 @@
 import { visit } from 'unist-util-visit'
-import hast from 'hast'
+import { type Element } from 'hast'
 
 import { Processor, Transformer } from 'unified'
 import { Node } from 'unist'
@@ -10,7 +10,7 @@ const propertyRegExp = /^(\S+)=(\S+)$/
 const sizeRegExp = /^(\d+(?:\.\d+)?)x(\d+(?:\.\d+)?)/
 
 function imageAltExtendsPlugin(this: Processor): Transformer {
-  function visitor(el: hast.Element) {
+  function visitor(el: Element) {
     if (el.tagName !== 'img' || !el.properties) return
 
     const alt = el.properties.alt as string | undefined

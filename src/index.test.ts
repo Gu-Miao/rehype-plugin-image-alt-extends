@@ -13,9 +13,9 @@ async function process(rawMarkdown: string): Promise<string> {
       .use(html)
       .process(rawMarkdown, (err, file) => {
         if (err || !file) {
-          return reject(err)
+          reject(err)
         }
-        return resolve(file.toString())
+        resolve(file!.toString())
       })
   })
 }
